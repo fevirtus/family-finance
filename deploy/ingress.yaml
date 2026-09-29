@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: finance
+  namespace: finance
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: finance.fevirtus.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: finance-web, port: { name: http } }
+    - host: finance-api.fevirtus.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: finance-api, port: { name: http } }

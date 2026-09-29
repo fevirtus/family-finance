@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finance-web
+  namespace: finance
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: finance-web }
+  template:
+    metadata:
+      labels: { app: finance-web }
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/fevirtus/finance-web
+          ports:
+            - { name: http, containerPort: 3000 }
+          envFrom:
+            - secretRef: { name: finance-web-env }
+          readinessProbe:
+            httpGet: { path: /login, port: http }
+            periodSeconds: 10
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { memory: 384Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: finance-web
+  namespace: finance
+spec:
+  selector: { app: finance-web }
+  ports:
+    - { name: http, port: 80, targetPort: http }
