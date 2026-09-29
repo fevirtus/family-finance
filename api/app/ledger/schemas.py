@@ -137,3 +137,21 @@ class TransactionList(BaseModel):
     total_count: int
     sum_expense: int
     sum_income: int
+
+
+class CategoryAmount(BaseModel):
+    category_id: uuid.UUID | None
+    amount: int
+    count: int
+
+
+class SummaryOut(BaseModel):
+    month: str
+    total_expense: int
+    total_income: int
+    prev_total_expense: int
+    prev_total_income: int
+    transaction_count: int
+    uncategorized_count: int
+    expense_by_category: list[CategoryAmount]
+    income_by_category: list[CategoryAmount]

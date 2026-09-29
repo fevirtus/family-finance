@@ -2,13 +2,13 @@ import uuid
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from sqlalchemy import and_, case, func, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.deps import get_current_user
 from app.db import get_session
 from app.groups.service import get_membership
-from app.ledger.common import get_in_group
+from app.ledger.common import get_in_group, sum_where
 from app.ledger.schemas import (
     TransactionCreate,
     TransactionList,
@@ -41,10 +41,6 @@ async def _validate_refs(
         )
         if (category.kind == "expense") != (amount < 0):
             raise HTTPException(status_code=422, detail="Category kind does not match amount sign")
-
-
-def _signed_sum(condition):
-    return func.coalesce(func.sum(case((condition, Transaction.amount), else_=0)), 0)
 
 
 @router.get("", response_model=TransactionList)
@@ -91,8 +87,8 @@ async def list_transactions(
         await session.execute(
             select(
                 func.count(),
-                _signed_sum(and_(Transaction.amount < 0, not_transfer)),
-                _signed_sum(and_(Transaction.amount > 0, not_transfer)),
+                sum_where(and_(Transaction.amount < 0, not_transfer)),
+                sum_where(and_(Transaction.amount > 0, not_transfer)),
             ).where(*conditions)
         )
     ).one()

@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from app import health
 from app.auth import router as auth_router
 from app.groups import router as groups_router
-from app.ledger import accounts, categories, transactions
+from app.ledger import accounts, categories, summary, transactions
 
 
 def create_app() -> FastAPI:
@@ -14,6 +14,7 @@ def create_app() -> FastAPI:
     app.include_router(accounts.router)
     app.include_router(categories.router)
     app.include_router(transactions.router)
+    app.include_router(summary.router)
     return app
 
 
