@@ -31,3 +31,17 @@ const vndFormatter = new Intl.NumberFormat("vi-VN");
 export function formatVnd(amount: number): string {
   return `${vndFormatter.format(amount)} đ`;
 }
+
+/** Compact VND label for charts and chips: 45k, 4,2tr, 500đ. */
+export function shortVnd(amount: number): string {
+  const sign = amount < 0 ? "-" : "";
+  const abs = Math.abs(amount);
+  if (abs >= 999_500) {
+    const tenths = Math.round(abs / 100_000);
+    const text =
+      tenths % 10 === 0 ? String(tenths / 10) : `${Math.floor(tenths / 10)},${tenths % 10}`;
+    return `${sign}${text}tr`;
+  }
+  if (abs >= 1_000) return `${sign}${Math.round(abs / 1_000)}k`;
+  return `${sign}${abs}đ`;
+}

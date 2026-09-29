@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatVnd, parseVnd } from "./money";
+import { formatVnd, parseVnd, shortVnd } from "./money";
 
 describe("parseVnd", () => {
   it.each([
@@ -29,5 +29,19 @@ describe("formatVnd", () => {
   it("uses Vietnamese grouping", () => {
     expect(formatVnd(1_200_000)).toBe("1.200.000 đ");
     expect(formatVnd(-45_000)).toBe("-45.000 đ");
+  });
+});
+
+describe("shortVnd", () => {
+  it.each([
+    [45_000, "45k"],
+    [-320_000, "-320k"],
+    [4_200_000, "4,2tr"],
+    [25_000_000, "25tr"],
+    [12_450_000, "12,5tr"],
+    [500, "500đ"],
+    [999_600, "1tr"],
+  ])("formats %d as %s", (amount, expected) => {
+    expect(shortVnd(amount)).toBe(expected);
   });
 });
