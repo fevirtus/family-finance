@@ -7,6 +7,6 @@ resources:
   - ingress.yaml
 images:
   - name: ghcr.io/fevirtus/finance-api
-    newTag: sha-a6ebe8fcbf165ea23b2d89a920260c4e1358a0a4
+    newTag: sha-fd3f7b73dd1743b939285806b5674d94aeef34b7
   - name: ghcr.io/fevirtus/finance-web
-    newTag: sha-a6ebe8fcbf165ea23b2d89a920260c4e1358a0a4
+    newTag: sha-fd3f7b73dd1743b939285806b5674d94aeef34b7
