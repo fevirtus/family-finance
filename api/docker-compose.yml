@@ -1,0 +1,11 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: finance
+      POSTGRES_PASSWORD: finance
+      POSTGRES_DB: finance
+    ports:
+      - "55432:5432"
+    volumes:
+      - ./scripts/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql:ro
