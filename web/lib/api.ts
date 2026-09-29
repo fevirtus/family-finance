@@ -1,6 +1,6 @@
 import "server-only";
 import { getToken } from "next-auth/jwt";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { usableApiToken } from "@/lib/api-token";
 
@@ -35,9 +35,16 @@ export async function getApiToken(): Promise<string | undefined> {
   return usableApiToken(jwt);
 }
 
+/** Login URL that returns to the current page (same-origin paths only). */
+export async function loginUrl(): Promise<string> {
+  const path = (await headers()).get("x-pathname") ?? "/";
+  const safe = path.startsWith("/") && !path.startsWith("//") ? path : "/";
+  return `/login?callbackUrl=${encodeURIComponent(safe)}`;
+}
+
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const apiToken = await getApiToken();
-  if (!apiToken) redirect("/login");
+  if (!apiToken) redirect(await loginUrl());
 
   const res = await fetch(`${process.env.API_URL}${path}`, {
     ...init,
@@ -48,7 +55,7 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
       ...init.headers,
     },
   });
-  if (res.status === 401) redirect("/login");
+  if (res.status === 401) redirect(await loginUrl());
   if (!res.ok) {
     let detail = res.statusText;
     try {

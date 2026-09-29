@@ -91,4 +91,26 @@ export type InvitePreview = {
   already_member: boolean;
 };
 
-export type ActionResult = { error?: string };
+export type ActionResult = { error?: string; id?: string };
+
+export type TransactionPatch = Partial<TransactionInput>;
+
+export type CategoryAmount = { category_id: string | null; amount: number; count: number };
+
+export type Summary = {
+  month: string;
+  total_expense: number;
+  total_income: number;
+  prev_total_expense: number;
+  prev_total_income: number;
+  transaction_count: number;
+  uncategorized_count: number;
+  expense_by_category: CategoryAmount[];
+  income_by_category: CategoryAmount[];
+};
+
+export type Suggestions = {
+  expense_category_ids: string[];
+  income_category_ids: string[];
+  last_account_id: string | null;
+};

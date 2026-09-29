@@ -4,3 +4,4 @@ node_modules
 !.env.example
 *.test.ts
 *.test.tsx
+scripts
