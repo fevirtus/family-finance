@@ -1,16 +1,18 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.deps import get_current_user
 from app.db import get_session
+from app.groups.default_categories import DEFAULT_CATEGORIES
 from app.groups.service import get_membership
 from app.ledger.common import sum_where
-from app.ledger.schemas import CategoryAmount, SummaryOut
+from app.ledger.schemas import CategoryAmount, SuggestionsOut, SummaryOut
 from app.ledger.timeutil import month_range
-from app.models import GroupMember, Transaction
+from app.models import Account, Category, GroupMember, Transaction, User
 
 router = APIRouter(prefix="/groups/{group_id}", tags=["summary"])
 
@@ -87,4 +89,61 @@ async def get_summary(
         uncategorized_count=int(uncategorized),
         expense_by_category=await _by_category(session, current, expense=True),
         income_by_category=await _by_category(session, current, expense=False),
+    )
+
+
+SUGGESTION_LIMIT = 8
+SUGGESTION_WINDOW = timedelta(days=90)
+DEFAULT_RANK = {name: i for i, (name, _kind, _icon) in enumerate(DEFAULT_CATEGORIES)}
+
+
+@router.get("/suggestions", response_model=SuggestionsOut)
+async def get_suggestions(
+    group_id: uuid.UUID,
+    _member: GroupMember = Depends(get_membership),
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> SuggestionsOut:
+    categories = list(
+        await session.scalars(
+            select(Category).where(Category.group_id == group_id, Category.archived.is_(False))
+        )
+    )
+    usage = dict(
+        (
+            await session.execute(
+                select(Transaction.category_id, func.count())
+                .where(
+                    Transaction.group_id == group_id,
+                    Transaction.category_id.is_not(None),
+                    Transaction.occurred_at >= datetime.now(UTC) - SUGGESTION_WINDOW,
+                )
+                .group_by(Transaction.category_id)
+            )
+        ).all()
+    )
+
+    def rank(category: Category) -> tuple:
+        default = DEFAULT_RANK.get(category.name, len(DEFAULT_RANK))
+        return (-usage.get(category.id, 0), default, category.created_at)
+
+    def top(kind: str) -> list[uuid.UUID]:
+        ranked = sorted((c for c in categories if c.kind == kind), key=rank)
+        return [c.id for c in ranked[:SUGGESTION_LIMIT]]
+
+    last_account_id = await session.scalar(
+        select(Transaction.account_id)
+        .join(Account, Account.id == Transaction.account_id)
+        .where(
+            Transaction.group_id == group_id,
+            Transaction.user_id == user.id,
+            Account.archived.is_(False),
+        )
+        .order_by(Transaction.created_at.desc())
+        .limit(1)
+    )
+    return SuggestionsOut(
+        expense_category_ids=top("expense"),
+        income_category_ids=top("income"),
+        last_account_id=last_account_id,
     )

@@ -155,3 +155,9 @@ class SummaryOut(BaseModel):
     uncategorized_count: int
     expense_by_category: list[CategoryAmount]
     income_by_category: list[CategoryAmount]
+
+
+class SuggestionsOut(BaseModel):
+    expense_category_ids: list[uuid.UUID]
+    income_category_ids: list[uuid.UUID]
+    last_account_id: uuid.UUID | None
