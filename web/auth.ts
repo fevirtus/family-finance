@@ -33,10 +33,7 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
-      const valid = typeof token.apiTokenExpires === "number" && token.apiTokenExpires > Date.now();
-      session.apiToken = valid ? token.apiToken : undefined;
-      return session;
-    },
+    // No session callback on purpose: /api/auth/session is readable by browser JS, so the
+    // API token stays in the encrypted JWT cookie and is read server-side (lib/api.ts).
   },
 };

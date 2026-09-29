@@ -1,7 +1,5 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/auth";
-import { ApiError, apiFetch } from "@/lib/api";
+import { ApiError, apiFetch, getApiToken } from "@/lib/api";
 import type { InvitePreview } from "@/lib/types";
 import { btnCls } from "@/lib/ui";
 import { acceptInvite } from "./actions";
@@ -12,8 +10,7 @@ function Message({ text }: { text: string }) {
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const session = await getServerSession(authOptions);
-  if (!session?.apiToken) {
+  if (!(await getApiToken())) {
     redirect(`/login?callbackUrl=${encodeURIComponent(`/invite/${token}`)}`);
   }
 

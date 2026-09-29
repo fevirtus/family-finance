@@ -1,7 +1,8 @@
 import "server-only";
-import { getServerSession } from "next-auth";
+import { getToken } from "next-auth/jwt";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/auth";
+import { usableApiToken } from "@/lib/api-token";
 
 export class ApiError extends Error {
   constructor(
@@ -22,16 +23,28 @@ function describeDetail(detail: unknown): string {
   return JSON.stringify(detail);
 }
 
+/** Read the API token from the next-auth cookie on the server; never exposed to the browser. */
+export async function getApiToken(): Promise<string | undefined> {
+  const cookieStore = await cookies();
+  const jwt = await getToken({
+    req: {
+      cookies: Object.fromEntries(cookieStore.getAll().map((c) => [c.name, c.value])),
+      headers: {},
+    } as unknown as Parameters<typeof getToken>[0]["req"],
+  });
+  return usableApiToken(jwt);
+}
+
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const session = await getServerSession(authOptions);
-  if (!session?.apiToken) redirect("/login");
+  const apiToken = await getApiToken();
+  if (!apiToken) redirect("/login");
 
   const res = await fetch(`${process.env.API_URL}${path}`, {
     ...init,
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${session.apiToken}`,
+      Authorization: `Bearer ${apiToken}`,
       ...init.headers,
     },
   });
