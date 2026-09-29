@@ -1,7 +1,8 @@
 import uuid
+from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 AccountKind = Literal["bank", "ewallet", "cash", "credit"]
 CategoryKind = Literal["expense", "income"]
@@ -55,3 +56,84 @@ class CategoryOut(BaseModel):
     icon: str | None
     parent_id: uuid.UUID | None
     archived: bool
+
+
+MAX_AMOUNT = 10**12
+
+
+def _check_amount(value: int | None) -> int | None:
+    if value is None:
+        return value
+    if value == 0:
+        raise ValueError("amount must not be 0")
+    if abs(value) > MAX_AMOUNT:
+        raise ValueError("amount is too large")
+    return value
+
+
+class TransactionCreate(BaseModel):
+    account_id: uuid.UUID
+    amount: int
+    occurred_at: AwareDatetime
+    description: str = Field(default="", max_length=500)
+    category_id: uuid.UUID | None = None
+    merchant: str | None = Field(default=None, max_length=255)
+    note: str | None = Field(default=None, max_length=2000)
+    is_internal_transfer: bool = False
+
+    @field_validator("amount")
+    @classmethod
+    def validate_amount(cls, value: int) -> int:
+        return _check_amount(value)
+
+
+class TransactionUpdate(BaseModel):
+    account_id: uuid.UUID | None = None
+    amount: int | None = None
+    occurred_at: AwareDatetime | None = None
+    description: str | None = Field(default=None, max_length=500)
+    category_id: uuid.UUID | None = None
+    merchant: str | None = Field(default=None, max_length=255)
+    note: str | None = Field(default=None, max_length=2000)
+    is_internal_transfer: bool | None = None
+
+    @field_validator("amount")
+    @classmethod
+    def validate_amount(cls, value: int | None) -> int | None:
+        return _check_amount(value)
+
+    @model_validator(mode="after")
+    def required_fields_not_null(self) -> "TransactionUpdate":
+        for name in ("account_id", "amount", "occurred_at", "description", "is_internal_transfer"):
+            if name in self.model_fields_set and getattr(self, name) is None:
+                raise ValueError(f"{name} cannot be null")
+        return self
+
+
+class TransactionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    account_id: uuid.UUID
+    user_id: uuid.UUID | None
+    amount: int
+    occurred_at: datetime
+    description: str
+    merchant: str | None
+    counterparty: str | None
+    category_id: uuid.UUID | None
+    source: str
+    status: str
+    classified_by: str | None
+    is_internal_transfer: bool
+    reconciled: bool
+    note: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class TransactionList(BaseModel):
+    items: list[TransactionOut]
+    total_count: int
+    sum_expense: int
+    sum_income: int
