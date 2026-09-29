@@ -1,15 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SignOutButton } from "@/components/sign-out-button";
+import { AppShell } from "@/components/app-shell";
 import { apiFetch } from "@/lib/api";
-import type { Me } from "@/lib/types";
-
-const NAV: [string, string][] = [
-  ["transactions", "Giao dịch"],
-  ["accounts", "Tài khoản"],
-  ["categories", "Danh mục"],
-  ["settings", "Cài đặt"],
-];
+import type { Account, Category, Me, Suggestions } from "@/lib/types";
 
 export default async function GroupLayout({
   children,
@@ -23,20 +15,21 @@ export default async function GroupLayout({
   const group = me.groups.find((g) => g.id === groupId);
   if (!group) notFound();
 
+  const [accounts, categories, suggestions] = await Promise.all([
+    apiFetch<Account[]>(`/groups/${groupId}/accounts?include_archived=true`),
+    apiFetch<Category[]>(`/groups/${groupId}/categories?include_archived=true`),
+    apiFetch<Suggestions>(`/groups/${groupId}/suggestions`),
+  ]);
+
   return (
-    <div className="mx-auto max-w-5xl p-4">
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div className="font-semibold">{group.name}</div>
-        <nav className="flex flex-wrap gap-4 text-sm">
-          {NAV.map(([segment, label]) => (
-            <Link key={segment} href={`/g/${groupId}/${segment}`} className="hover:underline">
-              {label}
-            </Link>
-          ))}
-        </nav>
-        <SignOutButton />
-      </header>
+    <AppShell
+      groupId={groupId}
+      groupName={group.name}
+      accounts={accounts}
+      categories={categories}
+      suggestions={suggestions}
+    >
       {children}
-    </div>
+    </AppShell>
   );
 }
