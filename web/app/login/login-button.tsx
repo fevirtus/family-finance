@@ -1,14 +1,12 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { buttonVariants } from "@/components/ui/button";
-const btnCls = buttonVariants();
-const inputCls = "h-10 rounded-md border px-3 text-sm";
+import { Button } from "@/components/ui/button";
 
 export function LoginButton({ callbackUrl }: { callbackUrl: string }) {
   return (
-    <button className={btnCls} onClick={() => signIn("google", { callbackUrl })}>
+    <Button className="h-12 w-full text-base" onClick={() => signIn("google", { callbackUrl })}>
       Đăng nhập bằng Google
-    </button>
+    </Button>
   );
 }

@@ -8,5 +8,5 @@ export async function acceptInvite(token: string, _formData?: FormData): Promise
   const group = await apiFetch<GroupSummary>(`/invites/${encodeURIComponent(token)}/accept`, {
     method: "POST",
   });
-  redirect(`/g/${group.id}/transactions`);
+  redirect(`/g/${group.id}/overview`);
 }

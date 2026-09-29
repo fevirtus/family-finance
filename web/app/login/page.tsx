@@ -11,10 +11,18 @@ export default async function LoginPage({
 }) {
   const { callbackUrl, error } = await searchParams;
   return (
-    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Family Finance</h1>
+    <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-8 p-6">
+      <div className="space-y-3 text-center">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-primary text-3xl font-bold text-primary-foreground">
+          đ
+        </div>
+        <h1 className="text-2xl font-semibold">Family Finance</h1>
+        <p className="text-sm text-muted-foreground">
+          Theo dõi chi tiêu gia đình — nhanh, gọn, trên mọi thiết bị.
+        </p>
+      </div>
       {error && (
-        <p className="rounded-md bg-red-50 p-3 text-sm text-red-700">
+        <p className="rounded-xl bg-destructive/10 p-3 text-center text-sm text-destructive">
           Đăng nhập thất bại hoặc email chưa được cho phép.
         </p>
       )}
