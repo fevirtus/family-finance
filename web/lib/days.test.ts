@@ -31,6 +31,14 @@ describe("groupByVnDay", () => {
   });
 });
 
+describe("groupByVnDay with more pages", () => {
+  it("marks only the last day as incomplete when more items exist", () => {
+    const items = [tx("2026-09-30T05:00:00Z", -1), tx("2026-09-29T05:00:00Z", -2)];
+    expect(groupByVnDay(items, { hasMore: true }).map((g) => g.complete)).toEqual([true, false]);
+    expect(groupByVnDay(items).map((g) => g.complete)).toEqual([true, true]);
+  });
+});
+
 describe("vnDayLabel", () => {
   const now = new Date("2026-09-29T03:00:00Z"); // 10:00 Tue 29/09 in VN
   it("labels today and yesterday", () => {

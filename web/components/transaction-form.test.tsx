@@ -152,9 +152,23 @@ describe("TransactionForm (edit)", () => {
       expect(onSubmit.mock.calls[0][0]).toMatchObject({
         account_id: "a1",
         amount: -45_000,
-        occurred_at: "2026-09-29T12:30:00+07:00",
+        occurred_at: "2026-09-29T05:30:00Z",
         category_id: "c3",
         note: "ăn sáng",
+      }),
+    );
+  });
+
+  it("keeps untouched time (with seconds) and description exactly as stored", async () => {
+    const imported = { ...initial, occurred_at: "2026-09-30T16:30:45.123Z", description: "CK NGUYEN VAN A " };
+    const { onSubmit, user } = setup({ initial: imported });
+    await user.type(screen.getByLabelText("Ghi chú"), "hi");
+    await user.click(screen.getByRole("button", { name: "Lưu thay đổi" }));
+    await waitFor(() =>
+      expect(onSubmit.mock.calls[0][0]).toMatchObject({
+        occurred_at: "2026-09-30T16:30:45.123Z",
+        description: "CK NGUYEN VAN A ",
+        note: "hi",
       }),
     );
   });

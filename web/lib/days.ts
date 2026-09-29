@@ -7,22 +7,25 @@ export function vnDateKey(iso: string): string {
   return toVnLocalInput(iso).slice(0, 10);
 }
 
-export type DayGroup<T> = { key: string; items: T[]; total: number };
+/** `complete` is false for the last day when more items exist beyond this page (partial total). */
+export type DayGroup<T> = { key: string; items: T[]; total: number; complete: boolean };
 
 export function groupByVnDay<
   T extends { occurred_at: string; amount: number; is_internal_transfer: boolean },
->(items: T[]): DayGroup<T>[] {
+>(items: T[], { hasMore = false }: { hasMore?: boolean } = {}): DayGroup<T>[] {
   const groups: DayGroup<T>[] = [];
   for (const item of items) {
     const key = vnDateKey(item.occurred_at);
     let group = groups.at(-1);
     if (!group || group.key !== key) {
-      group = { key, items: [], total: 0 };
+      group = { key, items: [], total: 0, complete: true };
       groups.push(group);
     }
     group.items.push(item);
     if (!item.is_internal_transfer) group.total += item.amount;
   }
+  const last = groups.at(-1);
+  if (last && hasMore) last.complete = false;
   return groups;
 }
 

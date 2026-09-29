@@ -133,16 +133,21 @@ export function TransactionForm({
     }
     let occurredAt: string;
     try {
-      occurredAt = vnLocalInputToIso(occurredLocal);
+      // Untouched fields keep their stored value (seconds, spacing) so edits send only real changes.
+      occurredAt =
+        initial && occurredLocal === toVnLocalInput(initial.occurred_at)
+          ? initial.occurred_at
+          : vnLocalInputToIso(occurredLocal);
     } catch {
       setError("Thời gian không hợp lệ");
       return;
     }
+    const trimmed = description.trim();
     const input: TransactionInput = {
       account_id: accountId,
       amount: kind === "expense" ? -parsed : parsed,
       occurred_at: occurredAt,
-      description: description.trim(),
+      description: initial && trimmed === initial.description.trim() ? initial.description : trimmed,
       category_id: categoryId,
       note: note.trim() || null,
     };

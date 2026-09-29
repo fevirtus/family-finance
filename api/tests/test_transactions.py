@@ -156,3 +156,12 @@ async def test_non_member_cannot_list(client, setup):
     wife = await login(client, "wife@example.com", "Wife")
     url = f"/groups/{setup['gid']}/transactions"
     assert (await client.get(url, headers=wife)).status_code == 404
+
+
+async def test_uncategorized_filter_skips_internal_transfers(client, setup):
+    await add(client, setup, description="CK lạ")
+    await add(client, setup, description="Nạp MoMo", is_internal_transfer=True)
+    url = f"/groups/{setup['gid']}/transactions?uncategorized=true"
+    body = (await client.get(url, headers=setup["me"])).json()
+    assert [t["description"] for t in body["items"]] == ["CK lạ"]
+    assert body["total_count"] == 1

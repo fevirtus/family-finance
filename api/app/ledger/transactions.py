@@ -69,7 +69,9 @@ async def list_transactions(
     if category_id is not None:
         conditions.append(Transaction.category_id == category_id)
     if uncategorized:
+        # Internal transfers never need a category; keep this list equal to the summary count.
         conditions.append(Transaction.category_id.is_(None))
+        conditions.append(Transaction.is_internal_transfer.is_(False))
     if status is not None:
         conditions.append(Transaction.status == status)
     if q:

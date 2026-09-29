@@ -46,7 +46,7 @@ export default async function TransactionsPage({
   ]);
   const accountName = new Map(accounts.map((a) => [a.id, a.name]));
   const categoryById = new Map(categories.map((c) => [c.id, c]));
-  const days = groupByVnDay(list.items);
+  const days = groupByVnDay(list.items, { hasMore: list.total_count > list.items.length });
 
   const keep: Record<string, string> = {};
   for (const key of ["account_id", "category_id", "q", "uncategorized"] as const) {
@@ -78,7 +78,7 @@ export default async function TransactionsPage({
         <section key={day.key}>
           <div className="flex items-center justify-between px-1 pb-1 pt-2 text-xs text-muted-foreground">
             <span className="font-medium">{vnDayLabel(day.key)}</span>
-            {day.total !== 0 && (
+            {day.complete && day.total !== 0 && (
               <span className={cn("tabular-nums", day.total > 0 && "text-emerald-600")}>
                 {formatVnd(day.total)}
               </span>
