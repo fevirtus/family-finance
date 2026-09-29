@@ -29,6 +29,9 @@ import { cn } from "@/lib/utils";
 
 type Kind = "expense" | "income";
 
+/** 7 suggestions + “Khác…” = two full rows of the 4-column grid. */
+const GRID_SUGGESTIONS = 7;
+
 export const AMOUNT_CHIPS: [string, number][] = [
   ["20k", 20_000],
   ["50k", 50_000],
@@ -96,10 +99,10 @@ export function TransactionForm({
     const grid = ids
       .map((cid) => byId.get(cid))
       .filter((c): c is Category => Boolean(c))
-      .slice(0, 8);
+      .slice(0, GRID_SUGGESTIONS);
     const selected = categoryId ? byId.get(categoryId) : undefined;
     if (selected && !grid.some((c) => c.id === selected.id)) {
-      grid.splice(Math.min(grid.length, 7), grid.length, selected);
+      grid.splice(Math.min(grid.length, GRID_SUGGESTIONS - 1), grid.length, selected);
     }
     return grid;
   }, [kindCategories, suggestions, kind, categoryId]);
@@ -280,23 +283,25 @@ export function TransactionForm({
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor={`${id}-description`}>Mô tả</Label>
+      <div>
+        <Label htmlFor={`${id}-description`} className="sr-only">
+          Mô tả
+        </Label>
         <Input
           id={`${id}-description`}
           maxLength={500}
-          placeholder="VD: phở bò"
+          placeholder="Mô tả (tuỳ chọn) — VD: phở bò"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-2">
         <button
           type="button"
           aria-label="Tài khoản"
           onClick={() => setPanel(panel === "accounts" ? "grid" : "accounts")}
-          className="flex min-h-11 items-center gap-2 rounded-full border px-3 text-sm"
+          className="flex min-h-11 max-w-[45%] shrink-0 items-center gap-1 truncate rounded-full border px-3 text-sm"
         >
           {account ? `${ACCOUNT_ICON[account.kind]} ${account.name}` : "Chọn tài khoản"}
           <ChevronDown className="size-4" />
@@ -310,7 +315,7 @@ export function TransactionForm({
           value={occurredLocal}
           onChange={(e) => setOccurredLocal(e.target.value)}
           suppressHydrationWarning
-          className="min-h-11 w-auto rounded-full"
+          className="min-h-11 min-w-0 flex-1 rounded-full text-sm"
         />
       </div>
 
@@ -350,7 +355,7 @@ export function TransactionForm({
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Huỷ</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} disabled={pending}>
+                <AlertDialogAction variant="destructive" onClick={handleDelete} disabled={pending}>
                   Xoá
                 </AlertDialogAction>
               </AlertDialogFooter>

@@ -57,6 +57,18 @@ describe("TransactionForm (create)", () => {
     );
   });
 
+  it("shows at most 7 suggested categories so the grid fills exactly two rows with 'Khác…'", () => {
+    const many: Category[] = Array.from({ length: 9 }, (_, i) => ({
+      id: `m${i}`, name: `Mục ${i}`, kind: "expense", icon: "🏷️", parent_id: null, archived: false,
+    }));
+    setup({
+      categories: many,
+      suggestions: { ...suggestions, expense_category_ids: many.map((c) => c.id) },
+    });
+    expect(screen.getAllByRole("button", { name: /Mục \d/ })).toHaveLength(7);
+    expect(screen.getByRole("button", { name: "Khác…" })).toBeInTheDocument();
+  });
+
   it("amount chips set the amount", async () => {
     const { onSubmit, user } = setup();
     await user.click(screen.getByRole("button", { name: "50k" }));

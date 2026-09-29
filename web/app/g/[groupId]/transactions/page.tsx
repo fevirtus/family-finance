@@ -78,9 +78,11 @@ export default async function TransactionsPage({
         <section key={day.key}>
           <div className="flex items-center justify-between px-1 pb-1 pt-2 text-xs text-muted-foreground">
             <span className="font-medium">{vnDayLabel(day.key)}</span>
-            <span className={cn("tabular-nums", day.total > 0 && "text-emerald-600")}>
-              {formatVnd(day.total)}
-            </span>
+            {day.total !== 0 && (
+              <span className={cn("tabular-nums", day.total > 0 && "text-emerald-600")}>
+                {formatVnd(day.total)}
+              </span>
+            )}
           </div>
           <div className="divide-y overflow-hidden rounded-2xl border bg-card shadow-sm">
             {day.items.map((t) => {
