@@ -6,7 +6,7 @@ from pathlib import Path
 os.environ.setdefault(
     "DATABASE_URL", "postgresql+asyncpg://finance:finance@localhost:55432/finance_test"
 )
-os.environ.setdefault("JWT_SECRET", "test-secret")
+os.environ.setdefault("JWT_SECRET", "test-secret-" + "x" * 32)
 os.environ.setdefault("GOOGLE_CLIENT_IDS", "test-client")
 os.environ.setdefault("ALLOWED_EMAILS", "me@example.com, wife@example.com, friend@example.com")
 os.environ.setdefault("PUBLIC_WEB_URL", "http://web.test")
