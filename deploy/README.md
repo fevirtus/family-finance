@@ -12,7 +12,8 @@ All commands use the homelab kubeconfig: `export KUBECONFIG=~/.kube/homelab`.
 2. **Google OAuth client** (Google Cloud Console → Credentials → OAuth client, type *Web*):
    - Authorized redirect URI: `https://finance.fevirtus.dev/api/auth/callback/google`
    - (Local dev) `http://localhost:3000/api/auth/callback/google`
-3. **Secrets** (fill in values yourself; never commit them):
+3. **Secrets** — run `KUBECONFIG=~/.kube/homelab ./deploy/create-secrets.sh` (prompts hide input),
+   or do it by hand (fill in values yourself; never commit them):
    ```bash
    kubectl create namespace finance --dry-run=client -o yaml | kubectl apply -f -
    kubectl -n finance create secret generic finance-api-env \
