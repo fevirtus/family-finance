@@ -1,4 +1,6 @@
-import { btnCls, inputCls } from "@/lib/ui";
+import { buttonVariants } from "@/components/ui/button";
+const btnCls = buttonVariants();
+const inputCls = "h-10 rounded-md border px-3 text-sm";
 import { createGroup } from "./actions";
 
 export default function OnboardingPage() {

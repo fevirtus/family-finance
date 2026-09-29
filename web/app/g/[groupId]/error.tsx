@@ -1,14 +1,14 @@
 "use client";
 
-import { btnSecondaryCls } from "@/lib/ui";
+import { Button } from "@/components/ui/button";
 
 export default function GroupError({ reset }: { error: Error; reset: () => void }) {
   return (
-    <div className="space-y-3 rounded-md bg-red-50 p-4 text-sm text-red-700">
+    <div className="space-y-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
       <p>Đã có lỗi xảy ra. Vui lòng thử lại.</p>
-      <button className={btnSecondaryCls} onClick={reset}>
+      <Button variant="outline" onClick={reset}>
         Thử lại
-      </button>
+      </Button>
     </div>
   );
 }

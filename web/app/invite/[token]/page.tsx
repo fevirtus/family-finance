@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { ApiError, apiFetch, getApiToken } from "@/lib/api";
 import type { InvitePreview } from "@/lib/types";
-import { btnCls } from "@/lib/ui";
+import { buttonVariants } from "@/components/ui/button";
+const btnCls = buttonVariants();
+const inputCls = "h-10 rounded-md border px-3 text-sm";
 import { acceptInvite } from "./actions";
 
 function Message({ text }: { text: string }) {
